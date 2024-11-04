@@ -53,7 +53,7 @@ class _ExampleItemState extends State<ExampleItem> {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        _pickImage(); // Start picking the image when the item is tapped
+        // _pickImage(); // Start picking the image when the item is tapped
         widget.onTap(); // Call the additional tap logic from parent
       },
       child: Container(

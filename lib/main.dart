@@ -2,9 +2,7 @@ import 'dart:io';
 
 import 'package:catalog_ui/example_item.dart';
 import 'package:flutter/material.dart' hide Theme;
-import 'package:image_picker/image_picker.dart';
 import 'package:imgly_sdk/imgly_sdk.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_editor_sdk/photo_editor_sdk.dart';
 import 'package:video_editor_sdk/video_editor_sdk.dart';
 
@@ -61,14 +59,17 @@ class _MyHomePageState extends State<MyHomePage> {
               description:
                   "Open the photo editor with user interface customizations.",
               onImagePicked: _updateImage,
-              onTap: () {} // You can add specific logic here
+              onTap: () {
+                _openPESDK;
+              } // You can add specific logic here
               ),
           ExampleItem(
               title: "Open video editor",
               description:
                   "Open the video editor with user interface customizations.",
-              onImagePicked: null,
-              onTap: () {})
+              onTap: () {
+                _openVESDK;
+              })
         ],
       ),
     );
@@ -87,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _openPESDK() async {
     try {
       final result = await PESDK.openEditor(
-          image: image!.path, configuration: configuration);
+          image: "assets/LA.jpg", configuration: configuration);
       print(result?.image);
     } catch (e) {
       print(e);
