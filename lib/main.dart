@@ -38,16 +38,15 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   File? image;
 
-  // Callback function to receive the image from the child
   void _updateImage(File? imageChild) {
     setState(() {
       image = imageChild;
     });
+    print("Image path is: ${image?.path}");
   }
 
   @override
   Widget build(BuildContext context) {
-    print("image path is: ${image?.path}");
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title, style: const TextStyle(color: Colors.black)),
@@ -58,14 +57,18 @@ class _MyHomePageState extends State<MyHomePage> {
         padding: const EdgeInsets.only(top: 5, bottom: 25),
         children: [
           ExampleItem(
-              "Open photo editor",
-              "Open the photo editor with user interface customizations.",
+              title: "Open photo editor",
+              description:
+                  "Open the photo editor with user interface customizations.",
               onImagePicked: _updateImage,
-              _openPESDK),
+              onTap: () {} // You can add specific logic here
+              ),
           ExampleItem(
-              "Open video editor",
-              "Open the video editor with user interface customizations.",
-              _openVESDK)
+              title: "Open video editor",
+              description:
+                  "Open the video editor with user interface customizations.",
+              onImagePicked: null,
+              onTap: () {})
         ],
       ),
     );
@@ -84,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _openPESDK() async {
     try {
       final result = await PESDK.openEditor(
-          image: image!.path.toString(), configuration: configuration);
+          image: image!.path, configuration: configuration);
       print(result?.image);
     } catch (e) {
       print(e);
