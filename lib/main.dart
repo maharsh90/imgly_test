@@ -34,13 +34,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  File? image;
+  String? image;
 
-  void _updateImage(File? imageChild) {
+  void _updateImage(String? imageChild) {
     setState(() {
       image = imageChild;
     });
-    print("Image path is: ${image?.path}");
+    print("Image path is: ${image}");
   }
 
   @override
