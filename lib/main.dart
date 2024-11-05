@@ -2,7 +2,10 @@ import 'dart:io';
 
 import 'package:catalog_ui/example_item.dart';
 import 'package:flutter/material.dart' hide Theme;
+import 'package:flutter/services.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:imgly_sdk/imgly_sdk.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photo_editor_sdk/photo_editor_sdk.dart';
 import 'package:video_editor_sdk/video_editor_sdk.dart';
 
@@ -61,6 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
               onImagePicked: _updateImage,
               onTap: () {
                 _openPESDK;
+                invoke();
               } // You can add specific logic here
               ),
           ExampleItem(
@@ -90,8 +94,125 @@ class _MyHomePageState extends State<MyHomePage> {
       final result = await PESDK.openEditor(
           image: "assets/LA.jpg", configuration: configuration);
       print(result?.image);
+      invoke();
     } catch (e) {
       print(e);
+    }
+  }
+
+  // void invoke() async {
+  //   try {
+  //     final outputDirectory = await getTemporaryDirectory();
+  //     final filepath =
+  //         "${outputDirectory.uri}export${Platform.isAndroid ? ".png" : ""}";
+  //     // final configuration =
+  //     //     Configuration(export: ExportOptions(filename: filepath));
+
+  //     // Open the photo editor and handle the export as well as any occurring errors.
+  //     final result = await PESDK.openEditor(
+  //         image: image,
+  //         configuration:
+  //             Configuration(export: ExportOptions(filename: filepath)));
+
+  //     if (result != null) {
+  //       // The user exported a new photo successfully and the newly generated photo is located at `result.image`.
+  //       print(result.image);
+  //     } else {
+  //       // The user exported a new photo successfully and the newly generated photo is located at `result.image`.
+  //       return;
+  //     }
+  //   } catch (error) {
+  //     // The user exported a new photo successfully and the newly generated photo is located at `result.image`.
+  //     print(error);
+  //   }
+  // }
+
+  void downloadImageToPhotos(String imagePath) async {
+    try {
+      final result = await ImageGallerySaver.saveFile(imagePath);
+      if (result['isSuccess'] == true) {
+        print("Image saved to gallery at path: ${result['filePath']}");
+      } else {
+        print("Failed to save image to gallery.");
+      }
+    } on PlatformException catch (e) {
+      print("Error saving image to gallery: $e");
+    }
+  }
+
+  // void invoke() async {
+  //   try {
+  //     final outputDirectory = await getTemporaryDirectory();
+  //     final filepath = "${outputDirectory.path}/export.png";
+
+  //     final result = await PESDK.openEditor(
+  //       image: image,
+  //       configuration: Configuration(export: ExportOptions(filename: filepath)),
+  //     );
+
+  //     if (result != null) {
+  //       downloadImageToPhotos(result.image);
+  //     } else {
+  //       print("Image export was canceled.");
+  //     }
+  //   } catch (error) {
+  //     print("Error: $error");
+  //   }
+  // }
+
+  // void invoke() async {
+  //   try {
+  //     final outputDirectory = await getTemporaryDirectory();
+  //     final filepath =
+  //         "${outputDirectory.path}/export${Platform.isAndroid ? ".png" : ""}";
+
+  //     final result = await PESDK.openEditor(
+  //       image: image,
+  //       configuration: Configuration(export: ExportOptions(filename: filepath)),
+  //     );
+
+  //     if (result != null) {
+  //       final File imageFile = File(result.image);
+  //       final savedImage = await saveImageToGallery(imageFile);
+  //       print("Image saved to gallery: $savedImage");
+  //       downloadImageToPhotos(result.image);
+  //     } else {
+  //       print("No image exported.");
+  //     }
+  //   } catch (error) {
+  //     print("Error: $error");
+  //   }
+  // }
+
+  void invoke() async {
+    try {
+      // Open the editor and export the image
+      final result = await PESDK.openEditor(
+        image: image,
+        configuration: Configuration(export: ExportOptions()),
+      );
+
+      if (result != null) {
+        // Directly save the exported image to the Photos app
+        await saveImageToGallery(result.image);
+      } else {
+        print("Image export was canceled.");
+      }
+    } catch (error) {
+      print("Error: $error");
+    }
+  }
+
+  Future<void> saveImageToGallery(String imagePath) async {
+    try {
+      final result = await ImageGallerySaver.saveFile(imagePath);
+      if (result['isSuccess'] == true) {
+        print("Image successfully saved to gallery at: ${result['filePath']}");
+      } else {
+        print("Failed to save image to gallery.");
+      }
+    } on PlatformException catch (e) {
+      print("Error saving image to gallery: $e");
     }
   }
 

@@ -1,7 +1,10 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:photo_editor_sdk/photo_editor_sdk.dart';
+import 'package:imgly_sdk/imgly_sdk.dart';
+import 'package:flutter/material.dart' hide Theme;
 
 class ExampleItem extends StatefulWidget {
   const ExampleItem({
@@ -24,6 +27,7 @@ class ExampleItem extends StatefulWidget {
 class _ExampleItemState extends State<ExampleItem> {
   final ImagePicker _picker = ImagePicker();
   bool _isPicking = false; // Flag to prevent multiple requests
+  String? imagePath;
 
   // Future<void> _pickImage() async {
   //   if (_isPicking) return; // Prevents multiple requests
@@ -55,7 +59,7 @@ class _ExampleItemState extends State<ExampleItem> {
       // Select an image from the gallery using the [ImagePicker].
       final imagePicker = ImagePicker();
       final image = await imagePicker.pickImage(source: ImageSource.gallery);
-      final imagePath = image?.path;
+      imagePath = image?.path;
       if (imagePath == null) return;
 
       // Open the photo editor and handle the export as well as any occurring errors.
@@ -74,6 +78,33 @@ class _ExampleItemState extends State<ExampleItem> {
       print(error);
     }
   }
+
+  // void invoke() async {
+  //   try {
+  //     final outputDirectory = await getTemporaryDirectory();
+  //     final filepath =
+  //         "${outputDirectory.uri}export${Platform.isAndroid ? ".png" : ""}";
+  //     // final configuration =
+  //     //     Configuration(export: ExportOptions(filename: filepath));
+
+  //     // Open the photo editor and handle the export as well as any occurring errors.
+  //     final result = await PESDK.openEditor(
+  //         image: imagePath,
+  //         configuration:
+  //             Configuration(export: ExportOptions(filename: filepath)));
+
+  //     if (result != null) {
+  //       // The user exported a new photo successfully and the newly generated photo is located at `result.image`.
+  //       print(result.image);
+  //     } else {
+  //       // The user exported a new photo successfully and the newly generated photo is located at `result.image`.
+  //       return;
+  //     }
+  //   } catch (error) {
+  //     // The user exported a new photo successfully and the newly generated photo is located at `result.image`.
+  //     print(error);
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -129,3 +160,5 @@ class _ExampleItemState extends State<ExampleItem> {
 //     print(error);
 //   }
 // }
+
+
