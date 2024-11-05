@@ -127,38 +127,7 @@ class _MyHomePageState extends State<MyHomePage> {
   //   }
   // }
 
-  void downloadImageToPhotos(String imagePath) async {
-    try {
-      final result = await ImageGallerySaver.saveFile(imagePath);
-      if (result['isSuccess'] == true) {
-        print("Image saved to gallery at path: ${result['filePath']}");
-      } else {
-        print("Failed to save image to gallery.");
-      }
-    } on PlatformException catch (e) {
-      print("Error saving image to gallery: $e");
-    }
-  }
-
-  // void invoke() async {
-  //   try {
-  //     final outputDirectory = await getTemporaryDirectory();
-  //     final filepath = "${outputDirectory.path}/export.png";
-
-  //     final result = await PESDK.openEditor(
-  //       image: image,
-  //       configuration: Configuration(export: ExportOptions(filename: filepath)),
-  //     );
-
-  //     if (result != null) {
-  //       downloadImageToPhotos(result.image);
-  //     } else {
-  //       print("Image export was canceled.");
-  //     }
-  //   } catch (error) {
-  //     print("Error: $error");
-  //   }
-  // }
+  //working
 
   // void invoke() async {
   //   try {
@@ -175,7 +144,6 @@ class _MyHomePageState extends State<MyHomePage> {
   //       final File imageFile = File(result.image);
   //       final savedImage = await saveImageToGallery(imageFile);
   //       print("Image saved to gallery: $savedImage");
-  //       downloadImageToPhotos(result.image);
   //     } else {
   //       print("No image exported.");
   //     }
@@ -184,17 +152,32 @@ class _MyHomePageState extends State<MyHomePage> {
   //   }
   // }
 
-  void invoke() async {
+  // Future<String?> saveImageToGallery(File imageFile) async {
+  //   try {
+  //     final result = await ImageGallerySaver.saveFile(imageFile.path);
+  //     return result['filePath'];
+  //   } on PlatformException catch (e) {
+  //     print("Failed to save image to gallery: $e");
+  //     return null;
+  //   }
+  // }
+
+  Future<void> invoke() async {
     try {
-      // Open the editor and export the image
       final result = await PESDK.openEditor(
         image: image,
         configuration: Configuration(export: ExportOptions()),
       );
 
       if (result != null) {
-        // Directly save the exported image to the Photos app
-        await saveImageToGallery(result.image);
+        final downloadPath = await getDownloadPath();
+        if (downloadPath != null) {
+          final savedFilePath =
+              await saveImageToDownloadPath(result.image, downloadPath);
+          print("Image saved at: $savedFilePath");
+        } else {
+          print("Failed to get the download path.");
+        }
       } else {
         print("Image export was canceled.");
       }
@@ -203,16 +186,37 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Future<void> saveImageToGallery(String imagePath) async {
+  Future<String?> getDownloadPath() async {
     try {
-      final result = await ImageGallerySaver.saveFile(imagePath);
-      if (result['isSuccess'] == true) {
-        print("Image successfully saved to gallery at: ${result['filePath']}");
-      } else {
-        print("Failed to save image to gallery.");
+      Directory? downloadsDirectory;
+
+      if (Platform.isAndroid) {
+        downloadsDirectory = Directory('/storage/emulated/0/Download');
+      } else if (Platform.isIOS) {
+        downloadsDirectory =
+            await getApplicationDocumentsDirectory(); // iOS doesn't have a public "Downloads" folder
       }
-    } on PlatformException catch (e) {
-      print("Error saving image to gallery: $e");
+
+      if (downloadsDirectory != null && !await downloadsDirectory.exists()) {
+        await downloadsDirectory.create(recursive: true);
+      }
+      return downloadsDirectory?.path;
+    } catch (e) {
+      print("Error getting download path: $e");
+      return null;
+    }
+  }
+
+  Future<String?> saveImageToDownloadPath(
+      String imagePath, String downloadPath) async {
+    try {
+      final File imageFile = File(imagePath);
+      final newPath = '$downloadPath/exported_image.png';
+      final File newFile = await imageFile.copy(newPath);
+      return newFile.path;
+    } catch (e) {
+      print("Error saving image to download path: $e");
+      return null;
     }
   }
 
